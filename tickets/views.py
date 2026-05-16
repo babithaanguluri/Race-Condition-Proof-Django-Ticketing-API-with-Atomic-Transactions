@@ -25,3 +25,27 @@ def book_vulnerable(request, event_id):
         return JsonResponse({"status": "success"}, status=201)
     
     return JsonResponse({"status": "error", "message": "No seats available"}, status=400)
+
+@csrf_exempt
+def book_pessimistic(request, event_id):
+    if request.method != 'POST':
+        return JsonResponse({"status": "error", "message": "Method not allowed"}, status=405)
+
+    try:
+        with transaction.atomic():
+            event = Event.objects.select_for_update().get(id=event_id)
+            
+            if event.booked_seats < event.total_seats:
+                event.booked_seats += 1
+                event.save()
+                
+                Booking.objects.create(event=event, user_name="pessimistic_user")
+                
+                transaction.on_commit(lambda: log_confirmation(event_id))
+                
+                return JsonResponse({"status": "success"}, status=201)
+            
+            return JsonResponse({"status": "error", "message": "No seats available"}, status=400)
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
