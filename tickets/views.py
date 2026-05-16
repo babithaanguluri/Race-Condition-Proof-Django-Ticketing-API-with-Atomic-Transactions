@@ -74,4 +74,51 @@ def book_optimistic(request, event_id):
             
     return JsonResponse({"status": "error", "message": "No seats available"}, status=400)
 
+@csrf_exempt
+def book_pessimistic_fail(request, event_id):
+    if request.method != 'POST':
+        return JsonResponse({"status": "error", "message": "Method not allowed"}, status=405)
+
+    try:
+        with transaction.atomic():
+            event = Event.objects.select_for_update().get(id=event_id)
+            
+            if event.booked_seats < event.total_seats:
+                event.booked_seats += 1
+                event.save()
+                
+                Booking.objects.create(event=event, user_name="pessimistic_fail_user")
+                
+                transaction.on_commit(lambda: log_confirmation(event_id))
+                
+                raise Exception("Deliberate rollback")
+            
+            return JsonResponse({"status": "error", "message": "No seats available"}, status=400)
+    except Exception as e:
+        if str(e) == "Deliberate rollback":
+            return JsonResponse({"status": "error", "message": "Internal Server Error"}, status=500)
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
+@csrf_exempt
+def reset_event(request, event_id):
+    if request.method != 'POST':
+        return JsonResponse({"status": "error", "message": "Method not allowed"}, status=405)
+    
+    event = get_object_or_404(Event, id=event_id)
+    event.booked_seats = 0
+    event.version = 0
+    event.save()
+    Booking.objects.filter(event=event).delete()
+    return JsonResponse({"status": "success"})
+
+def event_status(request, event_id):
+    event = get_object_or_404(Event, id=event_id)
+    return JsonResponse({
+        "id": event.id,
+        "booked_seats": event.booked_seats,
+        "total_seats": event.total_seats,
+        "version": event.version
+    })
+
+
 
