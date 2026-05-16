@@ -1,14 +1,10 @@
-# 🎟️ Race-Condition-Proof Django Ticketing API
-
-[![Docker](https://img.shields.io/badge/Docker-Enabled-blue?logo=docker)](https://www.docker.com/)
-[![Django](https://img.shields.io/badge/Django-5.0+-green?logo=django)](https://www.djangoproject.com/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue?logo=postgresql)](https://www.postgresql.org/)
+#  Race-Condition-Proof Django Ticketing API
 
 A robust, containerized Django API designed to demonstrate and resolve critical race conditions in high-concurrency environments. This project showcases industry-standard locking mechanisms (Pessimistic & Optimistic) and atomic transaction management to ensure 100% data integrity during seat bookings.
 
 ---
 
-## 🏗️ System Architecture
+##  System Architecture
 
 The following diagram illustrates the flow of a concurrent booking request through our application stack, highlighting the transactional integrity and row-level locking mechanism.
 
@@ -43,7 +39,7 @@ graph TD
 
 ---
 
-## 🚀 Key Features
+##  Key Features
 
 ### 1. Advanced Locking Mechanisms
 *   **Vulnerable Implementation**: A "read-modify-write" pattern without locking, demonstrating how concurrent requests can overwrite each other (Lost Update problem).
@@ -87,7 +83,7 @@ docker-compose ps
 
 ---
 
-## 🧪 Concurrency Testing
+##  Concurrency Testing
 
 The included `test_concurrency.py` script stress-tests the API by sending 50 simultaneous requests to each endpoint.
 
@@ -118,7 +114,7 @@ python test_concurrency.py
 
 ---
 
-## 📖 Technical Implementation Notes
+##  Technical Implementation Notes
 
 ### The `on_commit` Side Effect
 In `views.py`, we use:
@@ -129,12 +125,12 @@ This ensures that the "CONFIRMATION" log entry in Docker only appears if the tra
 
 ---
 
-## 📝 License
+##  License
 This project is for educational purposes demonstrating database concurrency patterns.
 
 ---
 
-## 📊 Locking Strategy Comparison
+##  Locking Strategy Comparison
 
 | Strategy | Implementation | Pros | Cons |
 | :--- | :--- | :--- | :--- |
