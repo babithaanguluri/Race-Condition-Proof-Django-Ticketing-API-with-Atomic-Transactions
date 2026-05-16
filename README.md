@@ -131,3 +131,14 @@ This ensures that the "CONFIRMATION" log entry in Docker only appears if the tra
 
 ## 📝 License
 This project is for educational purposes demonstrating database concurrency patterns.
+
+---
+
+## 📊 Locking Strategy Comparison
+
+| Strategy | Implementation | Pros | Cons |
+| :--- | :--- | :--- | :--- |
+| **None** | Read -> Logic -> Write | Fast, Simple | Data corruption under load |
+| **Pessimistic** | `select_for_update()` | Guarantees integrity | Can lead to DB deadlocks/timeout |
+| **Optimistic** | `WHERE version = read_version` | High throughput | Fails on high contention |
+
