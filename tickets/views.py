@@ -49,3 +49,29 @@ def book_pessimistic(request, event_id):
     except Exception as e:
         return JsonResponse({"status": "error", "message": str(e)}, status=500)
 
+@csrf_exempt
+def book_optimistic(request, event_id):
+    if request.method != 'POST':
+        return JsonResponse({"status": "error", "message": "Method not allowed"}, status=405)
+
+    event = get_object_or_404(Event, id=event_id)
+    
+    if event.booked_seats < event.total_seats:
+        updated_count = Event.objects.filter(
+            id=event_id, 
+            version=event.version,
+            booked_seats__lt=models.F('total_seats')
+        ).update(
+            booked_seats=models.F('booked_seats') + 1,
+            version=models.F('version') + 1
+        )
+        
+        if updated_count > 0:
+            Booking.objects.create(event=event, user_name="optimistic_user")
+            return JsonResponse({"status": "success"}, status=201)
+        else:
+            return JsonResponse({"status": "error", "message": "Conflict, please retry"}, status=409)
+            
+    return JsonResponse({"status": "error", "message": "No seats available"}, status=400)
+
+
