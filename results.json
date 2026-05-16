@@ -1,0 +1,18 @@
+{
+  "vulnerable": {
+    "successful_bookings": 50,
+    "failed_bookings": 0,
+    "total_seats_in_db": 12
+  },
+  "pessimistic": {
+    "successful_bookings": 30,
+    "failed_bookings": 20,
+    "total_seats_in_db": 30
+  },
+  "optimistic": {
+    "successful_bookings": 17,
+    "conflict_failures": 33,
+    "other_failures": 0,
+    "total_seats_in_db": 17
+  }
+}
